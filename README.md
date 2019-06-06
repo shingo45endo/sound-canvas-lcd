@@ -1,7 +1,7 @@
 sound-canvas-lcd
 ================
 
-![](https://user-images.githubusercontent.com/24827672/59031877-dff40680-889f-11e9-9947-f0d5406ca3de.png)
+[![](https://user-images.githubusercontent.com/24827672/59031877-dff40680-889f-11e9-9947-f0d5406ca3de.png)](https://shingo45endo.github.io/sound-canvas-lcd/)
 
 This is a Web Component to display LCD panel like Roland SOUND Canvas.
 
