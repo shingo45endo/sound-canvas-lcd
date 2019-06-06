@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<title>SOUND Canvas LCD</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script type="module">
+import './sound_canvas_lcd.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+	const elemLcd = document.getElementById('my-lcd');
+
+	// Sets table contents for bar display.
+	{
+		let html = '';
+		for (let y = 0; y < 16; y++) {
+			html += '<tr>';
+			for (let x = 0; x < 16; x++) {
+				const active = (y === 15) ? 'active' : '';
+				html += `<td><button type="button" id="my-dot${x + y * 16}" class="my-dots btn btn-outline-secondary ${active} my-0 w-75" style="height: 1rem;" data-toggle="button">&nbsp;</button></td>`;
+			}
+			html += '</tr>\n';
+		}
+		document.getElementById('my-bitmap').innerHTML = html;
+	}
+
+	// Sets event handler and initial value to the text inputs.
+	for (const elem of [...document.querySelectorAll('input[type="text"]')]) {
+		elem.addEventListener('input', updateLcd);
+
+		if (!elem.value && elem.placeholder) {
+			elem.value = elem.placeholder;
+		}
+	}
+
+	// Sets event handler to the buttons.
+	// Note: Even at the timing of 'mouseup', buttons haven't been activated yet.
+	for (const elem of [...document.getElementsByClassName('my-dots')]) {
+		elem.addEventListener('click', () => setTimeout(updateLcd, 0));
+	}
+
+	// Updates the LCD at the first time.
+	updateLcd();
+
+	function updateLcd() {
+		// Updates the labels and the values.
+		for (const elem of [...document.querySelectorAll('input[type="text"]')]) {
+			const m = elem.id.match(/^my-(.*?)$/u);
+			if (m) {
+				elemLcd[m[1]] = elem.value;
+			}
+		}
+
+		// Updates the bitmap.
+		const flags = [...document.querySelectorAll('.my-dots')].map((e) => e.classList.contains('active'));
+		let bitmap = '';
+		for (let i = 0; i < flags.length; i += 4) {
+			const val = (Number(flags[i]) << 3) | (Number(flags[i + 1]) << 2) | (Number(flags[i + 2]) << 1) | Number(flags[i + 3]);
+			bitmap += val.toString(16);
+		}
+		elemLcd.bitmap = bitmap;
+	}
+});
+</script>
+<style>
+sound-canvas-lcd {
+	color: black;
+	background-color: hsl(30, 100%, 50%);
+}
+</style>
+</head>
+
+<body>
+	<!-- Navbar -->
+	<nav class="navbar sticky-top bg-light">
+		<div class="container align-items-start">
+			<h1 class="h6 mb-0">
+				<a class="navbar-brand" href="https://github.com/shingo45endo/sound-canvas-lcd" target="_blank" rel="noopener noreferrer">sound-canvas-lcd</a>
+			</h1>
+		</div>
+	</nav>
+
+	<!-- Main screen -->
+	<main class="container">
+		<div class="card mt-3">
+			<div class="card-header">
+				<h2 class="h6">LCD</h2>
+			</div>
+			<div class="card-body">
+				<div id="svg"></div>
+				<sound-canvas-lcd id="my-lcd"></sound-canvas-lcd>
+			</div>
+		</div>
+		<div class="card mt-3">
+			<div class="card-header">
+				<h2 class="h6">Contents</h2>
+			</div>
+			<div class="card-body">
+				<div class="row">
+					<div class="col-lg-3 col-6">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Label 0</div>
+							</div>
+							<input type="text" id="my-label0" class="form-control">
+						</div>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Value 0</div>
+							</div>
+							<input type="text" id="my-value0" class="form-control" placeholder="A01">
+						</div>
+						<div class="input-group mt-2">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Label 2</div>
+							</div>
+							<input type="text" id="my-label2" class="form-control" placeholder="LEVEL">
+						</div>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Value 2</div>
+							</div>
+							<input type="text" id="my-value2" class="form-control" placeholder="100">
+						</div>
+						<div class="input-group mt-2">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Label 4</div>
+							</div>
+							<input type="text" id="my-label4" class="form-control" placeholder="REVERB">
+						</div>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Value 4</div>
+							</div>
+							<input type="text" id="my-value4" class="form-control" placeholder="40">
+						</div>
+						<div class="input-group mt-2">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Label 6</div>
+							</div>
+							<input type="text" id="my-label6" class="form-control" placeholder="K SHIFT">
+						</div>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Value 6</div>
+							</div>
+							<input type="text" id="my-value6" class="form-control" placeholder="± 0">
+						</div>
+					</div>
+					<div class="col-lg-3 col-6">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Label 1</div>
+							</div>
+							<input type="text" id="my-label1" class="form-control">
+						</div>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Value 1</div>
+							</div>
+							<input type="text" id="my-value1" class="form-control" placeholder="001 Piano 1">
+						</div>
+						<div class="input-group mt-2">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Label 3</div>
+							</div>
+							<input type="text" id="my-label3" class="form-control" placeholder="PAN">
+						</div>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Value 3</div>
+							</div>
+							<input type="text" id="my-value3" class="form-control" placeholder="0">
+						</div>
+						<div class="input-group mt-2">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Label 5</div>
+							</div>
+							<input type="text" id="my-label5" class="form-control" placeholder="CHORUS">
+						</div>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Value 5</div>
+							</div>
+							<input type="text" id="my-value5" class="form-control" placeholder="0">
+						</div>
+						<div class="input-group mt-2">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Label 7</div>
+							</div>
+							<input type="text" id="my-label7" class="form-control" placeholder="MIDI CH">
+						</div>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<div class="input-group-text">Value 7</div>
+							</div>
+							<input type="text" id="my-value7" class="form-control" placeholder="A01">
+						</div>
+					</div>
+					<div class="col-lg-6 col-12">
+						<hr class="d-lg-none">
+						<table id="my-bitmap" style="width: 100%;"></table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+</body>
+</html>

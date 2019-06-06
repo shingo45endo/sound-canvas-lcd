@@ -1,0 +1,24 @@
+{
+  "name": "sound-canvas-lcd",
+  "version": "0.1.0",
+  "description": "A Web Component to display LCD panel like Roland SOUND Canvas",
+  "scripts": {
+    "lint": "eslint *.js index.html",
+    "start": "browser-sync start --server --files \"**/*\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/shingo45endo/sound-canvas-lcd.git"
+  },
+  "author": "shingo45endo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shingo45endo/sound-canvas-lcd/issues"
+  },
+  "homepage": "https://github.com/shingo45endo/sound-canvas-lcd#readme",
+  "devDependencies": {
+    "browser-sync": "^2.26.5",
+    "eslint": "^5.16.0",
+    "eslint-plugin-html": "^5.0.5"
+  }
+}
