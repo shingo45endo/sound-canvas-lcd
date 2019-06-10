@@ -264,7 +264,6 @@ export class SoundCanvasLcd extends HTMLElement {
 
 		// Initializes the member arguments.
 		this._elemSvg = elemSvg.cloneNode(true);
-		this._props = {...defaultProps};
 		this._dirtyFlags = new Set();
 
 		// Defines the properties.
@@ -273,14 +272,14 @@ export class SoundCanvasLcd extends HTMLElement {
 			const label = `label${i}`;
 			Object.defineProperty(this, label, {
 				get() {
-					return this._props[label];
+					return this.getAttribute(label);
 				},
 				set(val) {
 					if (typeof val !== 'string') {
 						console.warn('Invalid value');
 						return;
 					}
-					this._props[label] = val;
+					this.setAttribute(label, val);
 					this._setDirtyFlag(label);
 				},
 			});
@@ -289,21 +288,21 @@ export class SoundCanvasLcd extends HTMLElement {
 			const value = `value${i}`;
 			Object.defineProperty(this, value, {
 				get() {
-					return this._props[value];
+					return this.getAttribute(value);
 				},
 				set(val) {
 					if (typeof val !== 'string' && typeof val !== 'number') {
 						console.warn('Invalid value');
 						return;
 					}
-					this._props[value] = String(val);
+					this.setAttribute(value, val);
 					this._setDirtyFlag(value);
 				},
 			});
 		}
 
 		// Sets dirty flags for all the parts to force initial drawing.
-		for (const key of Object.keys(this._props)) {
+		for (const key of Object.keys(defaultProps)) {
 			this._setDirtyFlag(key);
 		}
 
@@ -331,7 +330,7 @@ export class SoundCanvasLcd extends HTMLElement {
 	}
 
 	get bitmap() {
-		return this._props.bitmap;
+		return this.getAttribute('bitmap');
 	}
 
 	set bitmap(val) {
@@ -339,7 +338,7 @@ export class SoundCanvasLcd extends HTMLElement {
 			console.warn('Invalid value');
 			return;
 		}
-		this._props.bitmap = val;
+		this.setAttribute('bitmap',  val);
 		this._setDirtyFlag('bitmap');
 	}
 
@@ -357,9 +356,10 @@ export class SoundCanvasLcd extends HTMLElement {
 		// Updates each part.
 		this._dirtyFlags.forEach((key) => {
 			const m = key.match(/^([a-zA-Z]+)(\d+)$/u);
+			const attr = this.getAttribute(key);
 			if (key.startsWith('value')) {
 				const index = m[2];
-				const str = (index !== '1') ? `   ${this._props[key]}`.slice(-3) : `${this._props[key]}                `.slice(0, 16);
+				const str = (index !== '1') ? `   ${attr}`.slice(-3) : `${attr}                `.slice(0, 16);
 				str.split('').forEach((ch, i) => {
 					const elem = this._elemSvg.getElementById(`letter-${index}-${i}`);
 					const code = ((hasGlyph(ch)) ? ch : '?').charCodeAt(0);
@@ -369,10 +369,10 @@ export class SoundCanvasLcd extends HTMLElement {
 			} else if (key.startsWith('label')) {
 				const index = m[2];
 				const elem = this._elemSvg.getElementById(`label-${index}`);
-				elem.textContent = this._props[key];
+				elem.textContent = attr;
 
 			} else if (key === 'bitmap') {
-				const bits = this._props[key].match(/[0-9a-f]{4}/uig).map((hex) => parseInt(hex, 16));
+				const bits = attr.match(/[0-9a-f]{4}/uig).map((hex) => parseInt(hex, 16));
 				for (let y = 0; y < 16; y++) {
 					const bit = bits[y];
 					for (let x = 0; x < 16; x++) {
