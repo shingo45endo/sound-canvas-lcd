@@ -338,7 +338,7 @@ export class SoundCanvasLcd extends HTMLElement {
 			console.warn('Invalid value');
 			return;
 		}
-		this.setAttribute('bitmap',  val);
+		this.setAttribute('bitmap', val);
 		this._setDirtyFlag('bitmap');
 	}
 
