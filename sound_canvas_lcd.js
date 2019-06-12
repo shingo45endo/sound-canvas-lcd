@@ -198,6 +198,7 @@ elemSvg.innerHTML = `
 	border-width: 0;
 	line-height: 0;
 	font-family: 'Arial';
+	user-select: none;
 }
 
 .lcd-on {
