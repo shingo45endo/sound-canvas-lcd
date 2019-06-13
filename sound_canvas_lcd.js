@@ -145,7 +145,7 @@ const letterAndLabels = [...new Array(8)].map((_, i) => {
 	const baseX = LCD_PADDING_X + (FONT_WIDTH * 3 + FONT_GAP_X * 2 + LCD_GAP) * (i % 2);
 	const baseY = LCD_PADDING_Y + (FONT_HEIGHT + LCD_GAP) * Math.trunc(i / 2);
 
-	let svg = `<text id="label-${i}" class="label" x="${baseX}" y="${baseY - LABEL_FONT_SIZE * 0.25}" width="${FONT_WIDTH * letterNum}" height="${LABEL_FONT_SIZE}" font-size="${LABEL_FONT_SIZE}" transform="scale(${LABEL_FONT_STRETCH}, 1)" transform-origin="${baseX}">LABEL ${i + 1}</text>`;
+	let svg = `<text id="label-${i}" class="label" x="${baseX}" y="${baseY - LABEL_FONT_SIZE * 0.25}" width="${FONT_WIDTH * letterNum}" height="${LABEL_FONT_SIZE}" font-size="${LABEL_FONT_SIZE}" transform="scale(${LABEL_FONT_STRETCH}, 1)" transform-origin="${baseX}"></text>`;
 	for (let j = 0; j < letterNum; j++) {
 		const x = baseX + (FONT_WIDTH + FONT_GAP_X) * j;
 		svg += `<use id="letter-${i}-${j}" class="letter" xlink:href="#font-32" x="${x}" y="${baseY}" width="${FONT_WIDTH}" height="${FONT_HEIGHT}"></use>`;
@@ -302,21 +302,9 @@ export class SoundCanvasLcd extends HTMLElement {
 			});
 		}
 
-		// Sets dirty flags for all the parts to force initial drawing.
-		for (const key of Object.keys(defaultProps)) {
-			this._setDirtyFlag(key);
-		}
-
 		// Creates and attaches the shadow root.
 		this._shadowRoot = this.attachShadow({mode: 'open'});
 		this._shadowRoot.appendChild(this._elemSvg);
-	}
-
-	connectedCallback() {
-		// Sets all the attributes to initialize.
-		for (const attr of [...this.attributes]) {
-			this[attr] = this.attributes[attr];
-		}
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
