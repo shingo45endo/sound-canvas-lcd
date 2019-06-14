@@ -145,7 +145,7 @@ const letterAndLabels = [...new Array(8)].map((_, i) => {
 	const baseX = LCD_PADDING_X + (FONT_WIDTH * 3 + FONT_GAP_X * 2 + LCD_GAP) * (i % 2);
 	const baseY = LCD_PADDING_Y + (FONT_HEIGHT + LCD_GAP) * Math.trunc(i / 2);
 
-	let svg = `<text id="label-${i}" class="label" x="${baseX}" y="${baseY - LABEL_FONT_SIZE * 0.25}" width="${FONT_WIDTH * letterNum}" height="${LABEL_FONT_SIZE}" font-size="${LABEL_FONT_SIZE}" transform="scale(${LABEL_FONT_STRETCH}, 1)" transform-origin="${baseX}"></text>`;
+	let svg = `<g transform="translate(${baseX * (1 - LABEL_FONT_STRETCH)}) scale(${LABEL_FONT_STRETCH}, 1)"><text id="label-${i}" class="label" x="${baseX}" y="${baseY - LABEL_FONT_SIZE * 0.25}" font-size="${LABEL_FONT_SIZE}"></text></g>`;
 	for (let j = 0; j < letterNum; j++) {
 		const x = baseX + (FONT_WIDTH + FONT_GAP_X) * j;
 		svg += `<use id="letter-${i}-${j}" class="letter" xlink:href="#font-32" x="${x}" y="${baseY}" width="${FONT_WIDTH}" height="${FONT_HEIGHT}"></use>`;
@@ -173,7 +173,7 @@ const partNumbers = [...new Array(16)].map((_, i) => {
 
 	const x = BARS_BASE_X + INTERVAL * (i % 16) + WIDTH / 2;
 
-	return `<text class="part" x="${x}" y="${BARS_BASE_Y + BARS_HEIGHT + LABEL_FONT_SIZE * 0.75}" width="${WIDTH}" height="${LABEL_FONT_SIZE}" font-size="${LABEL_FONT_SIZE}" text-anchor="middle" transform="scale(${LABEL_FONT_STRETCH}, 1)" transform-origin="${x}">${i + 1}</text>`;
+	return `<g transform="translate(${x * (1 - LABEL_FONT_STRETCH)}) scale(${LABEL_FONT_STRETCH}, 1)"><text class="part" x="${x}" y="${BARS_BASE_Y + BARS_HEIGHT + LABEL_FONT_SIZE * 0.75}" font-size="${LABEL_FONT_SIZE}" text-anchor="middle">${i + 1}</text></g>`;
 });
 
 // Makes an SVG string of the indicators.
@@ -193,10 +193,13 @@ elemSvg.innerHTML = `
 <style type="text/css">
 :host {
 	display: block;
+	line-height: 0;
+}
+
+svg {
 	box-shadow: 0 0 10vw 0 rgba(0, 0, 0, 0.5) inset;
 	border-style: inset;
 	border-width: 0;
-	line-height: 0;
 	font-family: 'Arial';
 	user-select: none;
 }
@@ -229,9 +232,9 @@ ${fontSymbols.join('\n')}
 <g fill="currentColor">
 	${indicators.join('')}
 </g>
-<g fill="currentColor">
-	<text class="lcd-off" x="${BARS_BASE_X - FONT_WIDTH + 5}" y="${BARS_BASE_Y + LABEL_FONT_SIZE * 0.75}" width="${LABEL_FONT_SIZE}" height="${LABEL_FONT_SIZE}" font-size="${LABEL_FONT_SIZE}" transform="scale(${LABEL_FONT_STRETCH}, 1)" transform-origin="${BARS_BASE_X - 45}">L</text>
-	<text class="lcd-off" x="${BARS_BASE_X - FONT_WIDTH + 5}" y="${BARS_BASE_Y + BARS_HEIGHT}" width="${LABEL_FONT_SIZE}" height="${LABEL_FONT_SIZE}" font-size="${LABEL_FONT_SIZE}" transform="scale(${LABEL_FONT_STRETCH}, 1)" transform-origin="${BARS_BASE_X - 45}">R</text>
+<g fill="currentColor" transform="translate(${(BARS_BASE_X - 45) * (1 - LABEL_FONT_STRETCH)}) scale(${LABEL_FONT_STRETCH}, 1)">
+	<text class="lcd-off" x="${BARS_BASE_X - FONT_WIDTH + 5}" y="${BARS_BASE_Y + LABEL_FONT_SIZE * 0.75}" font-size="${LABEL_FONT_SIZE}">L</text>
+	<text class="lcd-off" x="${BARS_BASE_X - FONT_WIDTH + 5}" y="${BARS_BASE_Y + BARS_HEIGHT}" font-size="${LABEL_FONT_SIZE}">R</text>
 </g>`;
 
 const defaultProps = {
