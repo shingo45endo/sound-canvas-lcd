@@ -190,12 +190,13 @@ const indicators = [...new Array(11)].map((_, i) => {
 const elemSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 elemSvg.setAttribute('viewBox', `0 0 ${LCD_WIDTH} ${LCD_HEIGHT}`);
 elemSvg.innerHTML = `
-<style type="text/css">
+<style id="host-css" type="text/css">
 :host {
 	display: block;
 	line-height: 0;
 }
-
+</style>
+<style type="text/css">
 svg {
 	box-shadow: 0 0 10vw 0 rgba(0, 0, 0, 0.5) inset;
 	border-style: inset;
@@ -307,7 +308,7 @@ export class SoundCanvasLcd extends HTMLElement {
 
 		// Creates and attaches the shadow root.
 		this._shadowRoot = this.attachShadow({mode: 'open'});
-		this._shadowRoot.appendChild(this._elemSvg);
+		this._shadowRoot.append(this._elemSvg);
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
@@ -332,6 +333,63 @@ export class SoundCanvasLcd extends HTMLElement {
 		}
 		this.setAttribute('bitmap', val);
 		this._setDirtyFlag('bitmap');
+	}
+
+	saveAsSvg() {
+		const blob = new Blob([(new XMLSerializer()).serializeToString(this._makeStyledSvg())], {type: 'text/xml'});
+		return blob;
+	}
+
+	saveAsPng(width, height, mimeType) {
+		return new Promise((resolve) => {
+			width  = this.offsetWidth;
+			height = this.offsetHeight;
+
+			// Creates an image element including a duplicated SVG.
+			const elemImg = new Image();
+			elemImg.src = `data:image/svg+xml;utf8,${encodeURIComponent((new XMLSerializer()).serializeToString(this._makeStyledSvg()))}`;
+			elemImg.addEventListener('load', () => {
+				// Creates a canvas which has same image size.
+				const elemCanvas = document.createElement('canvas');
+				elemCanvas.width  = width;
+				elemCanvas.height = height;
+
+				// Draws the image and save the canvas as a blob.
+				const ctx = elemCanvas.getContext('2d');
+				ctx.drawImage(elemImg, 0, 0, width, height);
+				elemCanvas.toBlob((blob) => resolve(blob), mimeType);
+			}, false);
+		});
+	}
+
+	_makeStyledSvg() {
+		// Clones the current SVG element.
+		const elemSvgCopy = this._elemSvg.cloneNode(true);
+		elemSvgCopy.setAttribute('width',  LCD_WIDTH);
+		elemSvgCopy.setAttribute('height', LCD_HEIGHT);
+
+		// Removes the style for host.
+		elemSvgCopy.getElementById('host-css').remove();
+
+		// Gets the computed style of the current element.
+		const styles = getComputedStyle(this);
+		const cssLines = [
+			'color',
+			'background-color',
+			'border-width',
+			'border-style',
+			'border-color',
+		].filter((key) => styles.getPropertyValue(key)).map((key) => `${key}: ${styles.getPropertyValue(key)};`);
+
+		// Creates a style element.
+		const elemStyle = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+		elemStyle.setAttribute('type', 'text/css');
+		elemStyle.innerHTML = `svg {\n${cssLines.join('\n\t')}\n}`;
+
+		// Adds the new style.
+		elemSvgCopy.prepend(elemStyle);
+
+		return elemSvgCopy;
 	}
 
 	_setDirtyFlag(key) {
