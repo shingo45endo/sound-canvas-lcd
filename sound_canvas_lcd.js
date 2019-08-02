@@ -120,6 +120,7 @@ const fontBits = {
 	'\u00a5': [0b0010101, 0b0010110, 0b1111100, 0b0010110, 0b0010101],	// YEN SIGN
 	'\u00b1': [0b1000100, 0b1000100, 0b1011111, 0b1000100, 0b1000100],	// PLUS-MINUS SIGN
 	'\u2161': [0b1000001, 0b1111111, 0b1000001, 0b1111111, 0b1000001],	// ROMAN NUMERAL TWO
+	'\ufffd': [0b1111111, 0b1111101, 0b1010101, 0b1111011, 0b1111111],	// REPLACEMENT CHARACTER
 };
 
 // Makes SVG symbol strings from the font bitmaps.
@@ -412,7 +413,7 @@ export class SoundCanvasLcd extends HTMLElement {
 				const str = (index !== '1') ? `   ${attr}`.slice(-3) : `${attr}                `.slice(0, 16);
 				str.split('').forEach((ch, i) => {
 					const elem = this._elemSvg.getElementById(`letter-${index}-${i}`);
-					const code = ((hasGlyph(ch)) ? ch : '?').charCodeAt(0);
+					const code = ((hasGlyph(ch)) ? ch : '\ufffd').charCodeAt(0);
 					elem.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `#font-${code}`);
 				});
 
