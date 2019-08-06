@@ -120,6 +120,7 @@ const fontBits = {
 	'\u00a5': [0b0010101, 0b0010110, 0b1111100, 0b0010110, 0b0010101],	// YEN SIGN
 	'\u00b1': [0b1000100, 0b1000100, 0b1011111, 0b1000100, 0b1000100],	// PLUS-MINUS SIGN
 	'\u2161': [0b1000001, 0b1111111, 0b1000001, 0b1111111, 0b1000001],	// ROMAN NUMERAL TWO
+
 	'\ufffd': [0b1111111, 0b1111101, 0b1010101, 0b1111011, 0b1111111],	// REPLACEMENT CHARACTER
 };
 
@@ -187,7 +188,7 @@ const indicators = [...new Array(11)].map((_, i) => {
 	return `<circle cx="${BARS_BASE_X - 10}" cy="${cy + INTERVAL * i}" r="${(i % 5 === 0) ? 5 : 3}" />`;
 });
 
-// Makes an SVG as a template. ('it doesn't mean "<template /> element")
+// Makes an SVG as a template. (it doesn't mean "<template /> element")
 const elemSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 elemSvg.setAttribute('viewBox', `0 0 ${LCD_WIDTH} ${LCD_HEIGHT}`);
 elemSvg.innerHTML = `
@@ -313,7 +314,7 @@ export class SoundCanvasLcd extends HTMLElement {
 	}
 
 	attributeChangedCallback(attr, oldVal, newVal) {
-		// Update the attribute if necessary.
+		// Updates the attribute if necessary.
 		if (oldVal !== newVal) {
 			this[attr] = newVal;
 		}
