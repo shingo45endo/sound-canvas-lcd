@@ -1,27 +1,23 @@
 {
 	"env": {
 		"browser": true,
-		"es6": true,
-		"node": true
+		"es2017": true
 	},
-	"plugins": [
-		"html"
-	],
 	"extends": "eslint:all",
-	"globals": {
-		"Atomics": "readonly",
-		"SharedArrayBuffer": "readonly"
-	},
 	"parserOptions": {
 		"ecmaVersion": 2018,
 		"sourceType": "module"
 	},
+	"plugins": [
+		"html"
+	],
 	"rules": {
-		"indent": ["error", "tab"],
+		"indent": ["error", "tab", {"ignoreComments": true}],
 		"linebreak-style": ["error", "unix"],
 		"quotes": ["error", "single", {"avoidEscape": true, "allowTemplateLiterals": true}],
 		"semi": ["error", "always"],
 
+		"array-bracket-newline": ["error", "consistent"],
 		"block-spacing": ["error", "never"],
 		"comma-dangle": ["error", "always-multiline"],
 		"key-spacing": ["error",
@@ -53,18 +49,26 @@
 			"named": "never",
 			"asyncArrow": "always"
 		}],
+		"spaced-comment": ["error", "always", {
+			"exceptions": ["EMPTY", "FALLTHRU", "FALLTHROUGH", "NOTREACHED"]
+		}],
+		"wrap-iife": ["error", "inside"],
 		"yoda": ["error", "never", {"exceptRange": true}],
 
 		"no-warning-comments": "warn",
 
 		"array-element-newline": "off",
+		"capitalized-comments": "off",
 		"complexity": "off",
 		"func-names": "off",
 		"func-style": "off",
+		"function-call-argument-newline": "off",
 		"id-length": "off",
 		"init-declarations": "off",
 		"line-comment-position": "off",
 		"lines-around-comment": "off",
+		"lines-between-class-members": "off",
+		"max-classes-per-file": "off",
 		"max-depth": "off",
 		"max-len": "off",
 		"max-lines": "off",
@@ -90,6 +94,7 @@
 		"no-param-reassign": "off",
 		"no-plusplus": "off",
 		"no-shadow": "off",
+		"no-sync": "off",
 		"no-tabs": "off",
 		"no-ternary": "off",
 		"no-undefined": "off",
