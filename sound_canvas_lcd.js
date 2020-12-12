@@ -272,6 +272,7 @@ export class SoundCanvasLcd extends HTMLElement {
 		// Initializes the member arguments.
 		this._elemSvg = elemSvg.cloneNode(true);
 		this._dirtyFlags = new Set();
+		this._prevBitmap = defaultProps.bitmap.repeat(1);
 
 		// Defines the properties.
 		for (let i = 0; i < 8; i++) {
@@ -424,12 +425,16 @@ export class SoundCanvasLcd extends HTMLElement {
 				elem.textContent = attr;
 
 			} else if (key === 'bitmap') {
-				const bits = attr.match(/[0-9a-f]{4}/uig).map((hex) => parseInt(hex, 16));
 				for (let y = 0; y < 16; y++) {
-					const bit = bits[y];
+					const bitSet = parseInt(attr.slice(y * 4, (y + 1) * 4), 16);
+					const prevBitSet = parseInt(this._prevBitmap.slice(y * 4, (y + 1) * 4), 16);
 					for (let x = 0; x < 16; x++) {
+						if (((bitSet ^ prevBitSet) & (1 << (15 - x))) === 0) {
+							continue;
+						}
+
 						const elem = this._elemSvg.getElementById(`dot-${x + 16 * y}`);
-						if ((bit & (1 << (15 - x))) !== 0) {
+						if ((bitSet & (1 << (15 - x))) !== 0) {
 							elem.classList.remove('lcd-off');
 							elem.classList.add('lcd-on');
 						} else {
@@ -438,6 +443,7 @@ export class SoundCanvasLcd extends HTMLElement {
 						}
 					}
 				}
+				this._prevBitmap = attr.repeat(1);
 
 			} else {
 				console.assert(false);
