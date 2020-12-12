@@ -257,8 +257,9 @@ const defaultProps = Object.freeze({
 	value5: '',
 	value6: '',
 	value7: '',
-	bitmap: '0000'.repeat(16),
-};
+	bitmap:  '0000'.repeat(16),
+	vbitmap: '0000'.repeat(16),
+});
 
 const hasGlyph = (() => {
 	const chars = Object.keys(fontBits);
@@ -335,7 +336,22 @@ export class SoundCanvasLcd extends HTMLElement {
 			return;
 		}
 		this.setAttribute('bitmap', val);
+		this.setAttribute('vbitmap', transposeBitmapStr(val));
 		this._setDirtyFlag('bitmap');
+	}
+
+	get vbitmap() {
+		return this.getAttribute('vbitmap');
+	}
+
+	set vbitmap(val) {
+		if (!/^[0-9a-f]{64}$/uig.test(val)) {
+			console.warn('Invalid value');
+			return;
+		}
+		this.setAttribute('vbitmap', val);
+		this.setAttribute('bitmap', transposeBitmapStr(val));
+		this._setDirtyFlag('bitmap');	// "bitmap" is also used as the dirty flag for "vbitmap".
 	}
 
 	saveAsSvg() {
@@ -452,6 +468,25 @@ export class SoundCanvasLcd extends HTMLElement {
 
 		this._dirtyFlags.clear();
 	}
+}
+
+function transposeBitmapStr(bitmapStr) {
+	console.assert(/^[0-9a-f]{64}$/uig.test(bitmapStr));
+
+	const bits = bitmapStr.match(/.{4}/ug).map((e) => parseInt(e, 16));
+	console.assert(bits.length === 16);
+
+	// Transposes a 16x16 bit matrix.
+	let m = 0x00ff;
+	for (let j = 8; j !== 0; j >>= 1, m ^=  (m << j)) {
+		for (let k = 0; k < 16; k = (k + j + 1) & ~j) {
+			const t = (bits[k] ^ (bits[k + j] >> j)) & m;
+			bits[k] ^= t;
+			bits[k + j] = bits[k + j] ^ (t << j);
+		}
+	}
+
+	return bits.map((e) => e.toString(16).padStart(4, '0')).join('');
 }
 
 customElements.define('sound-canvas-lcd', SoundCanvasLcd);
