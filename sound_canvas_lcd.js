@@ -21,7 +21,7 @@ console.assert(LCD_WIDTH === LCD_PADDING_X + (FONT_WIDTH + FONT_GAP_X) * 3 - FON
 console.assert(LCD_HEIGHT === LCD_PADDING_Y + FONT_HEIGHT * 4 + LCD_GAP * 3 + LCD_PADDING_Y);
 
 // 5x7 font bitmap data
-const fontBits = {
+const fontBits = Object.freeze({
 	' ':      [0b0000000, 0b0000000, 0b0000000, 0b0000000, 0b0000000],
 	'!':      [0b0000000, 0b0000000, 0b1011111, 0b0000000, 0b0000000],
 	'"':      [0b0000000, 0b0000111, 0b0000000, 0b0000111, 0b0000000],
@@ -122,10 +122,10 @@ const fontBits = {
 	'\u2161': [0b1000001, 0b1111111, 0b1000001, 0b1111111, 0b1000001],	// ROMAN NUMERAL TWO
 
 	'\ufffd': [0b1111111, 0b1111101, 0b1010101, 0b1111011, 0b1111111],	// REPLACEMENT CHARACTER
-};
+});
 
 // Makes SVG symbol strings from the font bitmaps.
-const fontSymbols = Object.keys(fontBits).map((key) => {
+const fontSymbols = Object.freeze(Object.keys(fontBits).map((key) => {
 	const WIDTH = 85;
 	const INTERVAL = 100;
 
@@ -139,10 +139,10 @@ const fontSymbols = Object.keys(fontBits).map((key) => {
 	}, `<symbol id="font-${key.codePointAt(0)}" viewBox="0 0 ${INTERVAL * 5} ${INTERVAL * 7}">`) + '</symbol>';
 
 	return svg;
-}, {});
+}, {}));
 
 // Makes an SVG string of the letters and their labels.
-const letterAndLabels = [...new Array(8)].map((_, i) => {
+const letterAndLabels = Object.freeze([...new Array(8)].map((_, i) => {
 	const letterNum = (i !== 1) ? 3 : 16;		// "1" is for "INSTRUMENT"
 	const baseX = LCD_PADDING_X + (FONT_WIDTH * 3 + FONT_GAP_X * 2 + LCD_GAP) * (i % 2);
 	const baseY = LCD_PADDING_Y + (FONT_HEIGHT + LCD_GAP) * Math.trunc(i / 2);
@@ -154,10 +154,10 @@ const letterAndLabels = [...new Array(8)].map((_, i) => {
 	}
 
 	return svg;
-});
+}));
 
 // Makes an SVG string of the 16x16 dot matrix.
-const barRects = [...new Array(16 * 16)].map((_, i) => {
+const barRects = Object.freeze([...new Array(16 * 16)].map((_, i) => {
 	const RATIO = BARS_HEIGHT / BARS_WIDTH;
 	const INTERVAL = BARS_WIDTH / 16;
 	const GAP = INTERVAL * 0.05;
@@ -166,27 +166,27 @@ const barRects = [...new Array(16 * 16)].map((_, i) => {
 	const y = BARS_BASE_Y + INTERVAL * Math.trunc(i / 16) * RATIO;
 
 	return `<rect id="dot-${i}" class="lcd-off" x="${x}" y="${y}" width="${INTERVAL - GAP}" height="${INTERVAL * RATIO - GAP}" />`;
-});
+}));
 
 // Makes an SVG string of the part numbers.
-const partNumbers = [...new Array(16)].map((_, i) => {
+const partNumbers = Object.freeze([...new Array(16)].map((_, i) => {
 	const INTERVAL = BARS_WIDTH / 16;
 	const WIDTH = INTERVAL * 0.95;
 
 	const x = BARS_BASE_X + INTERVAL * (i % 16) + WIDTH / 2;
 
 	return `<g transform="translate(${x * (1 - LABEL_FONT_STRETCH)}) scale(${LABEL_FONT_STRETCH}, 1)"><text class="part" x="${x}" y="${BARS_BASE_Y + BARS_HEIGHT + LABEL_FONT_SIZE * 0.75}" font-size="${LABEL_FONT_SIZE}" text-anchor="middle">${i + 1}</text></g>`;
-});
+}));
 
 // Makes an SVG string of the indicators.
-const indicators = [...new Array(11)].map((_, i) => {
+const indicators = Object.freeze([...new Array(11)].map((_, i) => {
 	const HEIGHT = BARS_HEIGHT * 15 / 16;
 	const INTERVAL = HEIGHT / (11 - 1);
 
 	const cy = BARS_BASE_Y + (BARS_HEIGHT / 16) / 2;
 
 	return `<circle cx="${BARS_BASE_X - 10}" cy="${cy + INTERVAL * i}" r="${(i % 5 === 0) ? 5 : 3}" />`;
-});
+}));
 
 // Makes an SVG as a template. (it doesn't mean "<template /> element")
 const elemSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -240,7 +240,7 @@ ${fontSymbols.join('\n')}
 	<text class="lcd-off" x="${BARS_BASE_X - FONT_WIDTH + 5}" y="${BARS_BASE_Y + BARS_HEIGHT}" font-size="${LABEL_FONT_SIZE}">R</text>
 </g>`;
 
-const defaultProps = {
+const defaultProps = Object.freeze({
 	label0: '',			// 'PART'
 	label1: '',			// 'INSTRUMENT'
 	label2: 'LEVEL',
