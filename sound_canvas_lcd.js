@@ -192,7 +192,7 @@ const indicators = Object.freeze([...new Array(11)].map((_, i) => {
 const elemSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 elemSvg.setAttribute('viewBox', `0 0 ${LCD_WIDTH} ${LCD_HEIGHT}`);
 elemSvg.innerHTML = `
-<style id="host-css" type="text/css">
+<style type="text/css" class="host-css">
 :host {
 	display: block;
 	line-height: 0;
@@ -388,7 +388,7 @@ export class SoundCanvasLcd extends HTMLElement {
 		elemSvgCopy.setAttribute('height', LCD_HEIGHT);
 
 		// Removes the style for host.
-		elemSvgCopy.getElementById('host-css').remove();
+		[...elemSvgCopy.getElementsByClassName('host-css')].forEach((e) => e.remove());
 
 		// Gets the computed style of the current element.
 		const styles = getComputedStyle(this);
@@ -403,7 +403,7 @@ export class SoundCanvasLcd extends HTMLElement {
 		// Creates a style element.
 		const elemStyle = document.createElementNS('http://www.w3.org/2000/svg', 'style');
 		elemStyle.setAttribute('type', 'text/css');
-		elemStyle.innerHTML = `svg {\n${cssLines.join('\n\t')}\n}`;
+		elemStyle.innerHTML = `\nsvg {\n\t${cssLines.join('\n\t')}\n}\n`;
 
 		// Adds the new style.
 		elemSvgCopy.prepend(elemStyle);
