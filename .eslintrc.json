@@ -12,6 +12,7 @@
 		"html"
 	],
 	"rules": {
+		"brace-style": ["error", "1tbs", {"allowSingleLine": true}],
 		"indent": ["error", "tab", {"ignoreComments": true}],
 		"linebreak-style": ["error", "unix"],
 		"quotes": ["error", "single", {"avoidEscape": true, "allowTemplateLiterals": true}],
@@ -87,6 +88,7 @@
 		"no-extra-parens": "off",
 		"no-inline-comments": "off",
 		"no-labels": "off",
+		"no-lonely-if": "off",
 		"no-magic-numbers": "off",
 		"no-multi-spaces": "off",
 		"no-negated-condition": "off",

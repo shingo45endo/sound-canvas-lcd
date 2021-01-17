@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<title>Virtual Sound Canvas LCD</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+<script type="module">
+import './sound_canvas_lcd_ex.js';
+
+window.addEventListener('DOMContentLoaded', async () => {
+	// Sets up MIDI devices.
+	const midiAccess = await navigator.requestMIDIAccess({sysex: true});
+	midiAccess.addEventListener('statechange', () => {
+		updateMidiDevices(midiAccess);
+	});
+	updateMidiDevices(midiAccess);
+
+	const elemLcd = document.getElementById('my-lcd');
+
+	function updateMidiDevices(midiAccess) {
+		// Sets input handler to MIDI In devices
+		for (const input of [...midiAccess.inputs.values()]) {
+			input.onmidimessage = handleMidiMessage;
+		}
+
+		// Updates the list.
+		document.getElementById('my-midi-in-devices').innerHTML = '';
+		for (const input of [...midiAccess.inputs.values()]) {
+			document.getElementById('my-midi-in-devices').insertAdjacentHTML('beforeend', `<li id="${input.id}" class="list-group-item d-flex justify-content-between align-items-center">${input.name}<span id="${input.id}-status" class="badge bg-primary rounded-pill" style="animation: midi-in-led both;">&nbsp;</span></li>`);
+		}
+	}
+
+	function handleMidiMessage(e) {
+		// Sends MIDI message to the virtual LCD.
+		elemLcd.inputBytes(e.data);
+
+		// Turns the virtual LED on.
+		const elemLed = document.getElementById(`${e.target.id}-status`);
+		if (elemLed) {
+			elemLed.style.animation = '';
+			void elemLed.offsetLeft;	// Force layout
+			elemLed.style.animation = `midi-in-led 0.2s forwards`;
+		}
+	}
+
+	document.getElementById('my-displayletter-send').addEventListener('click', () => {
+		elemLcd.displayLetter(document.getElementById('my-displayletter-text').value);
+	});
+
+	[...document.getElementsByName('color')].forEach((elem) => {
+		elem.addEventListener('click', () => {
+			elemLcd.setColorScheme(elem.dataset.color);
+		});
+	});
+
+	[...document.getElementsByName('displaytype')].forEach((elem) => {
+		elem.addEventListener('click', () => {
+			elemLcd.displayType = Number(elem.dataset.type);
+		});
+	});
+
+	[...document.getElementsByName('peakholdtype')].forEach((elem) => {
+		elem.addEventListener('click', () => {
+			elemLcd.peakHoldType = Number(elem.dataset.type);
+		});
+	});
+
+	[...document.getElementsByName('rows')].forEach((elem) => {
+		elem.addEventListener('click', () => {
+			elemLcd.rows = Number(elem.dataset.rows);
+		});
+	});
+
+	document.getElementById('my-save-as-svg').addEventListener('click', async () => {
+		const blob = await elemLcd.saveAsSvg();
+
+		const elemLink = makeDownloadLink(blob, `${makeFileName()}.svg`);
+		document.body.append(elemLink);
+		elemLink.click();
+		elemLink.remove();
+	});
+
+	document.getElementById('my-save-as-png').addEventListener('click', async () => {
+		const blob = await elemLcd.saveAsPng();
+
+		const elemLink = makeDownloadLink(blob, `${makeFileName()}.png`);
+		document.body.append(elemLink);
+		elemLink.click();
+		elemLink.remove();
+	});
+
+	function makeFileName() {
+		const dt = new Date();
+		return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}_${String(dt.getHours()).padStart(2, '0')}${String(dt.getMinutes()).padStart(2, '0')}${String(dt.getSeconds()).padStart(2, '0')}`;
+	}
+
+	function makeDownloadLink(blob, fileName) {
+		const elemLink = document.createElement('a');
+
+		if (fileName) {
+			elemLink.download = fileName;
+		}
+		elemLink.href = URL.createObjectURL(blob);
+
+		return elemLink;
+	}
+});
+</script>
+<style>
+@keyframes midi-in-led {
+	0% {opacity: 1;}
+	100% {opacity: 0;}
+}
+</style>
+</head>
+
+<body>
+	<!-- Navbar -->
+	<nav class="navbar navbar-light bg-light">
+		<div class="container">
+			<h1 class="h6 mb-0"><span class="navbar-brand">Virtual Sound Canvas LCD</span></h1>
+			<div class="btn-group" role="group">
+				<button type="button" id="my-save-as-png" class="btn btn-outline-primary">Save as PNG</button>
+				<button type="button" id="my-save-as-svg" class="btn btn-outline-primary">Save as SVG</button>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Main screen -->
+	<main class="container mt-2">
+		<div class="row">
+			<div class="col-12">
+				<sound-canvas-lcd-ex id="my-lcd"></sound-canvas-lcd-ex>
+			</div>
+			<div class="col-xl-4 col-lg-12 order-xl-1 mt-2">
+				<h2 class="h5">MIDI In Devices</h2>
+				<ul id="my-midi-in-devices" class="list-group"></ul>
+			</div>
+			<div class="col-xl-8 col-lg-12 order-xl-0 mt-2">
+				<h2 class="h5">Displayed Letter</h2>
+				<div class="row mt-2">
+					<div class="col-12">
+						<div class="input-group">
+							<input type="text" id="my-displayletter-text" class="form-control" placeholder="(1 to 32 characters)">
+							<button id="my-displayletter-send" class="btn btn-outline-secondary" type="button">Send</button>
+						</div>
+					</div>
+				</div>
+				<h2 class="h5 mt-2">Settings</h2>
+				<div class="row mt-2">
+					<div class="col-3 col-form-label text-end">LCD Color</div>
+					<div class="col-9">
+						<div class="btn-group" role="group">
+							<input type="radio" id="my-color-orange" class="btn-check" name="color" autocomplete="off" data-color="orange">
+							<label class="btn btn-outline-secondary" for="my-color-orange">Orange</label>
+							<input type="radio" id="my-color-green" class="btn-check" name="color" autocomplete="off" data-color="green">
+							<label class="btn btn-outline-secondary" for="my-color-green">Green</label>
+							<input type="radio" id="my-color-red" class="btn-check" name="color" autocomplete="off" data-color="red">
+							<label class="btn btn-outline-secondary" for="my-color-red">Red</label>
+							<input type="radio" id="my-color-darkgreen" class="btn-check" name="color" autocomplete="off" data-color="darkgreen">
+							<label class="btn btn-outline-secondary" for="my-color-darkgreen">Dark Green</label>
+							<input type="radio" id="my-color-darkblue" class="btn-check" name="color" autocomplete="off" data-color="darkblue">
+							<label class="btn btn-outline-secondary" for="my-color-darkblue">Dark Blue</label>
+							<input type="radio" id="my-color-darkorange" class="btn-check" name="color" autocomplete="off" data-color="darkorange">
+							<label class="btn btn-outline-secondary" for="my-color-darkorange">Dark Orange</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-2">
+					<div class="col-3 col-form-label text-end">Display Type</div>
+					<div class="col-9">
+						<div class="btn-group" role="group">
+							<input type="radio" id="my-displaytype-1" class="btn-check" name="displaytype" autocomplete="off" data-type="0" checked>
+							<label class="btn btn-outline-secondary px-3" for="my-displaytype-1" title="Normal">1</label>
+							<input type="radio" id="my-displaytype-2" class="btn-check" name="displaytype" autocomplete="off" data-type="1">
+							<label class="btn btn-outline-secondary px-3" for="my-displaytype-2" title="Single segment">2</label>
+							<input type="radio" id="my-displaytype-3" class="btn-check" name="displaytype" autocomplete="off" data-type="2">
+							<label class="btn btn-outline-secondary px-3" for="my-displaytype-3" title="Top to bottom">3</label>
+							<input type="radio" id="my-displaytype-4" class="btn-check" name="displaytype" autocomplete="off" data-type="3">
+							<label class="btn btn-outline-secondary px-3" for="my-displaytype-4" title="Top to bottom, single segment">4</label>
+							<input type="radio" id="my-displaytype-5" class="btn-check" name="displaytype" autocomplete="off" data-type="4">
+							<label class="btn btn-outline-secondary px-3" for="my-displaytype-5" title="Reverse">5</label>
+							<input type="radio" id="my-displaytype-6" class="btn-check" name="displaytype" autocomplete="off" data-type="5">
+							<label class="btn btn-outline-secondary px-3" for="my-displaytype-6" title="Reverse, single segment">6</label>
+							<input type="radio" id="my-displaytype-7" class="btn-check" name="displaytype" autocomplete="off" data-type="6">
+							<label class="btn btn-outline-secondary px-3" for="my-displaytype-7" title="Reverse, top to bottom">7</label>
+							<input type="radio" id="my-displaytype-8" class="btn-check" name="displaytype" autocomplete="off" data-type="7">
+							<label class="btn btn-outline-secondary px-3" for="my-displaytype-8" title="Reverse, top to bottom, single segment">8</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-2">
+					<div class="col-3 col-form-label text-end">Peak Hold Type</div>
+					<div class="col-9">
+						<div class="btn-group" role="group">
+							<input type="radio" id="my-peakholdtype-0" class="btn-check" name="peakholdtype" autocomplete="off" data-type="0">
+							<label class="btn btn-outline-secondary px-3" for="my-peakholdtype-0" title="Peak level hold is not in effect">Off</label>
+							<input type="radio" id="my-peakholdtype-1" class="btn-check" name="peakholdtype" autocomplete="off" data-type="1" checked>
+							<label class="btn btn-outline-secondary px-4" for="my-peakholdtype-1" title="The peak level segment goes down after holding the peak level">1</label>
+							<input type="radio" id="my-peakholdtype-2" class="btn-check" name="peakholdtype" autocomplete="off" data-type="2">
+							<label class="btn btn-outline-secondary px-4" for="my-peakholdtype-2" title="The peak level segment goes off after holding the peak level">2</label>
+							<input type="radio" id="my-peakholdtype-3" class="btn-check" name="peakholdtype" autocomplete="off" data-type="3">
+							<label class="btn btn-outline-secondary px-4" for="my-peakholdtype-3" title="The peak level segment goes up after holding the peak level">3</label>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-2">
+					<div class="col-3 col-form-label text-end">Number of Parts</div>
+					<div class="col-9">
+						<div class="btn-group" role="group">
+							<input type="radio" id="my-rows-1" class="btn-check" name="rows" autocomplete="off" data-rows="1" checked>
+							<label class="btn btn-outline-secondary" for="my-rows-1">16-Part</label>
+							<input type="radio" id="my-rows-2" class="btn-check" name="rows" autocomplete="off" data-rows="2">
+							<label class="btn btn-outline-secondary" for="my-rows-2">32-Part</label>
+							<input type="radio" id="my-rows-4" class="btn-check" name="rows" autocomplete="off" data-rows="4">
+							<label class="btn btn-outline-secondary" for="my-rows-4">64-Part</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+</body>
+</html>
