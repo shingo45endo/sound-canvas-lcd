@@ -10,14 +10,16 @@
 import './sound_canvas_lcd_ex.js';
 
 window.addEventListener('DOMContentLoaded', async () => {
-	// Sets up MIDI devices.
-	const midiAccess = await navigator.requestMIDIAccess({sysex: true});
-	midiAccess.addEventListener('statechange', () => {
+	try {
+		// Sets up MIDI devices.
+		const midiAccess = await navigator.requestMIDIAccess({sysex: true});
+		midiAccess.addEventListener('statechange', () => {
+			updateMidiDevices(midiAccess);
+		});
 		updateMidiDevices(midiAccess);
-	});
-	updateMidiDevices(midiAccess);
-
-	const elemLcd = document.getElementById('my-lcd');
+	} catch (e) {
+		console.error(e);
+	}
 
 	function updateMidiDevices(midiAccess) {
 		// Sets input handler to MIDI In devices
@@ -31,6 +33,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 			document.getElementById('my-midi-in-devices').insertAdjacentHTML('beforeend', `<li id="${input.id}" class="list-group-item d-flex justify-content-between align-items-center">${input.name}<span id="${input.id}-status" class="badge bg-primary rounded-pill" style="animation: midi-in-led both;">&nbsp;</span></li>`);
 		}
 	}
+
+	const elemLcd = document.getElementById('my-lcd');
 
 	function handleMidiMessage(e) {
 		// Sends MIDI message to the virtual LCD.
