@@ -478,11 +478,11 @@ function transposeBitmapStr(bitmapStr) {
 
 	// Transposes a 16x16 bit matrix.
 	let m = 0x00ff;
-	for (let j = 8; j !== 0; j >>= 1, m ^=  (m << j)) {
+	for (let j = 8; j !== 0; j >>= 1, m ^= (m << j)) {
 		for (let k = 0; k < 16; k = (k + j + 1) & ~j) {
 			const t = (bits[k] ^ (bits[k + j] >> j)) & m;
 			bits[k] ^= t;
-			bits[k + j] = bits[k + j] ^ (t << j);
+			bits[k + j] ^= (t << j);
 		}
 	}
 
