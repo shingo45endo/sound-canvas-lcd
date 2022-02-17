@@ -170,7 +170,7 @@ function getPartNo(portNo, addrH, addrM) {
 function makeDisplayedLetterStr(bytes) {
 	console.assert(bytes && bytes.length);
 	const str = String.fromCharCode(...bytes.map((byte) => (0x20 <= byte && byte <= 0x7f) ? byte : 0x20));
-	return str.replace('\x7e', '→').replace('\x7f', '←');
+	return str.replace(/\x7e/ug, '→').replace(/\x7f/ug, '←');
 }
 
 /* eslint-disable no-underscore-dangle, no-use-before-define */
