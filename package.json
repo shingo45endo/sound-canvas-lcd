@@ -3,8 +3,7 @@
   "version": "0.1.0",
   "description": "A Web Component to display LCD panel like Roland SOUND Canvas",
   "scripts": {
-    "lint": "eslint *.js *.html",
-    "start": "browser-sync start --server --files \"**/*\""
+    "lint": "eslint *.js *.html"
   },
   "repository": {
     "type": "git",
