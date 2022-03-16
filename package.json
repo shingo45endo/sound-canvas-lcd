@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A Web Component to display LCD panel like Roland SOUND Canvas",
   "scripts": {
-    "lint": "eslint *.js *.html"
+    "lint": "eslint {*.js,*.html}"
   },
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/shingo45endo/sound-canvas-lcd#readme",
   "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-plugin-html": "^6.0.0"
+    "eslint": "^7.32.0",
+    "eslint-plugin-html": "^6.2.0"
   }
 }
