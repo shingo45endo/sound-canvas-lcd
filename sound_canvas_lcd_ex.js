@@ -1210,29 +1210,29 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 		}
 	}
 
-	setDefaultPatchName(name) {
-		if (typeof name !== 'string') {
+	setDefaultPatchName(str) {
+		if (typeof str !== 'string') {
 			console.warn('Invalid value');
 			return;
 		}
 
-		this._settings.defaultPatchName = name.padEnd(16, ' ').slice(0, 16);
+		this._settings.defaultPatchName = str.padEnd(16, ' ').slice(0, 16);
 	}
 
-	setPatchName(name) {
-		if (typeof name !== 'string') {
+	setPatchName(str) {
+		if (typeof str !== 'string') {
 			console.warn('Invalid value');
 			return;
 		}
 
-		this._system.patchName = `${name.slice(0, 16)}${this._system.patchName.slice(name.length, 16)}`;
+		this._system.patchName = `${str.slice(0, 16)}${this._system.patchName.slice(str.length, 16)}`;
 		if (!this._isLetterDisplayed()) {
 			this._updateDisplayedParameter('patchName');
 		}
 	}
 
 	displayLetter(str) {
-		if (typeof name !== 'string') {
+		if (typeof str !== 'string') {
 			console.warn('Invalid value');
 			return;
 		}
