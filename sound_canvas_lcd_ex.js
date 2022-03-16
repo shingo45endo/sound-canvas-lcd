@@ -1144,10 +1144,10 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 			peakHoldType: 0x01,
 			displayTime: 0x06,
 			displayedLetter: null,
-			letterTimerId: -1,
+			letterTimerId: 0,
 			currentLetterIndex: -1,
 			displayedDotDataPages: [...new Array(10)].map(() => [...new Array(16)].fill(0)),
-			dotDataTimerId: -1,
+			dotDataTimerId: 0,
 		};
 		this._system = {
 			volume:   ('volume'   in initialParameters) ? initialParameters.volume   : 127,
@@ -1255,7 +1255,7 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 
 		this._resetDisplayDotData();
 		this._lcd.dotDataTimerId = setTimeout(() => {
-			this._lcd.dotDataTimerId = -1;
+			this._lcd.dotDataTimerId = 0;
 			this._isActive = true;
 		}, 480 * this._lcd.displayTime);
 	}
@@ -1263,7 +1263,7 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 	_resetDisplayLetter() {
 		if (this._isLetterDisplayed()) {
 			clearTimeout(this._lcd.letterTimerId);
-			this._lcd.letterTimerId = -1;
+			this._lcd.letterTimerId = 0;
 		}
 		this._lcd.currentLetterIndex = -1;
 		this.value1 = this._system.patchName;
@@ -1272,7 +1272,7 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 	_resetDisplayDotData() {
 		if (this._isDotDataDisplayed()) {
 			clearTimeout(this._lcd.dotDataTimerId);
-			this._lcd.dotDataTimerId = -1;
+			this._lcd.dotDataTimerId = 0;
 		}
 		this._isActive = true;
 	}
@@ -1305,11 +1305,11 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 	}
 
 	_isLetterDisplayed() {
-		return (this._lcd.letterTimerId >= 0);
+		return (this._lcd.letterTimerId !== 0);
 	}
 
 	_isDotDataDisplayed() {
-		return (this._lcd.dotDataTimerId >= 0);
+		return (this._lcd.dotDataTimerId !== 0);
 	}
 
 	setDefaultColor(color) {
