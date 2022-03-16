@@ -1126,6 +1126,12 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 	}
 
 	reset(initialParameters = {}) {
+		// Cancels the timers properly before reset of the properties regarding LCD.
+		if (this._lcd) {
+			this._resetDisplayLetter();
+			this._resetDisplayDotData();
+		}
+
 		this._parts = [...new Array(64)].map((_, partNo) => ({
 			rxPortNo: Math.trunc(partNo / 16),
 			rxChannelNo: partNo % 16,
