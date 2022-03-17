@@ -84,11 +84,11 @@ const getPeakHoldLevelFuncs = Object.freeze([...new Array(4)].map((_, type) => {
 	const PEAK_STEP_TIME = 200;
 
 	switch (type) {
-	case 0x00:
+	case 0x00:	// Peak level hold is not in effect.
 		return () => 0;
 
-	case 0x01:
-	case 0x03:
+	case 0x01:	// The peak level segment goes down after holding the peak level.
+	case 0x03:	// The peak level segment goes up after holding the peak level.
 		return (elapsedTime, peakLevel) => {
 			console.assert(elapsedTime >= 0);
 			if (elapsedTime < PEAK_HOLD_TIME) {
@@ -98,7 +98,7 @@ const getPeakHoldLevelFuncs = Object.freeze([...new Array(4)].map((_, type) => {
 			}
 		};
 
-	case 0x02:
+	case 0x02:	// The peak level segment goes off after holding the peak level.
 		return (elapsedTime, peakLevel) => (elapsedTime < PEAK_HOLD_TIME) ? peakLevel : 0;
 
 	default:
@@ -204,6 +204,7 @@ function makeYamahaDisplayDotDataHandler(isCheckSum = false) {
 		const dataBytes = bytes.slice(7, -1).map((byte) => byte & 0x7f);
 		let dotDataBytes = dataBytes;
 		if (addrL !== 0x00 || dataBytes.length !== 48) {
+			// If the display dot data is not "full", provides missing dot data from the current dot data to achieve "partial overwriting".
 			const oldDotDataBytes = [...new Array(48)].map((_, i) => (self._lcd.displayedDotDataPages[0][i % 16] << (Math.trunc(i / 16) * 7) >> 9) & 0x7f);
 			dotDataBytes = [...oldDotDataBytes.slice(0, addrL), ...dataBytes, ...oldDotDataBytes.slice(addrL + dataBytes.length, 48)];
 			console.assert(dotDataBytes.length === 48);
@@ -1132,6 +1133,7 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 			this._resetDisplayDotData();
 		}
 
+		// Resets all the properties.
 		this._parts = [...new Array(64)].map((_, partNo) => ({
 			rxPortNo: Math.trunc(partNo / 16),
 			rxChannelNo: partNo % 16,
@@ -1291,13 +1293,15 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 		}
 
 		if (this._lcd.displayedLetter.length <= 16) {
+			// If the length of the message is less than or equal to 16 bytes, the displayed message will be disappeared after a certain time.
 			this._lcd.currentLetterIndex = -1;
 			this.value1 = `${' '.repeat(Math.trunc((17 - this._lcd.displayedLetter.length) / 2))}${this._lcd.displayedLetter}`;	// Centering
 
 			this._lcd.letterTimerId = setTimeout(() => this._handleLetterTimer(), 2880);
 
 		} else {
-			const str = `${this._system.patchName}<${this._lcd.displayedLetter}<${this._system.patchName}`;
+			// If the length of the message is more than 16 bytes, the message will be displayed with auto-scrolling.
+			const str = `${this._system.patchName}<${this._lcd.displayedLetter}<${this._system.patchName}`;	// Displayed message starts with "<" and also ends with "<".
 			console.assert(str.length === this._lcd.displayedLetter.length + (16 + 1) * 2);
 			this.value1 = str.slice(index, index + 16);
 			if (index <= this._lcd.displayedLetter.length + 16) {
@@ -1423,24 +1427,24 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 
 			const [_, ccNo, value] = bytes;
 			switch (ccNo) {
-			case 7:
+			case 7:		// Channel Volume (MSB)
 				part.volume = value;
 				break;
 
-			case 11:
+			case 11:	// Expression (MSB)
 				part.expression = value;
 				break;
 
-			case 121:
+			case 121:	// Reset All Controllers
 				part.expression = 127;
 				break;
 
-			case 120:
-			case 123:
-			case 124:
-			case 125:
-			case 126:
-			case 127:
+			case 120:	// All Sound Off
+			case 123:	// All Notes Off
+			case 124:	// Omni Off
+			case 125:	// Omni On
+			case 126:	// Mono On
+			case 127:	// Poly On
 				part.notes.filter((note) => note.isUsed).forEach((note) => {
 					note.isNoteOn = false;
 					note.timestampOff = timestamp;
@@ -1526,15 +1530,18 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 		const colNum = 16 / rowNum;
 		const totalMaskBit = (1 << colNum) - 1;
 
-		const levelMaskBit = ((this._lcd.displayType & 0x1) === 0) ? totalMaskBit : 0x0000;
-		const totalXorBit  = ((this._lcd.displayType & 0x4) === 0) ? 0x0000 : totalMaskBit;
+		// Makes mask bits for the final composition.
+		const levelMaskBit = ((this._lcd.displayType & 0x1) === 0) ? totalMaskBit : 0x0000;	// Bar or Single segment
+		const totalXorBit  = ((this._lcd.displayType & 0x4) === 0) ? 0x0000 : totalMaskBit;	// Reverse or not
 
+		// Chooses functions for the final composition.
 		const getDisplayPeakLevel = (this._lcd.peakHoldType !== 3) ? (bar) => bar.currentPeakLevel : (bar) => {
 			const displayPeakLevel = (bar.currentPeakLevel > 0) ? bar.peakLevel + (bar.peakLevel - bar.currentPeakLevel) : 0;
 			return (0 <= displayPeakLevel && displayPeakLevel < colNum) ? displayPeakLevel : 0;
 		};
-		const reverseBar = ((this._lcd.displayType & 0x2) === 0) ? (bit) => bit : (bit) => reverseBits(bit, colNum);
+		const reverseBar = ((this._lcd.displayType & 0x2) === 0) ? (bit) => bit : (bit) => reverseBits(bit, colNum);	// Upside down or not
 
+		// Composites the bar, peak dot, and bottom line with reversal/flip effect.
 		const bits = this._bars.slice(0, 16 * rowNum).map((bar) => {
 			const levelBit = (1 << (bar.currentLevel + 1)) - 1;
 			const peakBit  = (1 << getDisplayPeakLevel(bar));
