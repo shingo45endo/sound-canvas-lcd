@@ -1387,10 +1387,10 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 		}
 
 		const channelNo = bytes[0] & 0x0f;
-		for (let i = 0; i < this._parts.length; i++) {
+		for (let i = 0; i < 16; i++) {
 			const partNo = portNo * 16 + i;
 			const part = this._parts[partNo];
-			if (part.rxPortNo !== portNo || part.rxChannelNo !== channelNo) {
+			if (!part || part.rxPortNo !== portNo || part.rxChannelNo !== channelNo) {
 				continue;
 			}
 
@@ -1418,10 +1418,10 @@ export class SoundCanvasLcdEx extends SoundCanvasLcd {
 		}
 
 		const channelNo = bytes[0] & 0x0f;
-		for (let i = 0; i < this._parts.length; i++) {
+		for (let i = 0; i < 16; i++) {
 			const partNo = portNo * 16 + i;
 			const part = this._parts[partNo];
-			if (part.rxPortNo !== portNo || part.rxChannelNo !== channelNo) {
+			if (!part || part.rxPortNo !== portNo || part.rxChannelNo !== channelNo) {
 				continue;
 			}
 
